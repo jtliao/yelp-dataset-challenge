@@ -36,7 +36,7 @@ def tag_reviews(n):
                 else:
                     stars_dict[st][word[0]] = 1
                 stars_list.append(st)
-                review_list.append(rev['text'])
+                review_list.append(filt)
     return filtered_words, review_list, stars_list
 # for w in sorted(stars_dict[1], key=stars_dict[1].get, reverse=True):
 #     print(w, stars_dict[1][w])
