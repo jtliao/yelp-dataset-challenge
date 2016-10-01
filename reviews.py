@@ -8,25 +8,36 @@ from sklearn import svm
 
 
 def tag_reviews(n):
+    # Tagger tags each word with its part of speech
     tagger = PerceptronTagger()
     data = []
     counter = 0
     with open('yelp_academic_dataset_review.json') as f:
         for line in f:
+            # Read in n lines
             if counter < n:
                 counter += 1
                 data.append(json.loads(line))
             else:
                 break
-    stars_dict = {1: {}, 1.5: {}, 2: {}, 2.5: {}, 3: {}, 3.5: {}, 4: {}, 4.5: {}, 5: {}}
-    valid_pos = {'JJ', 'JJR', 'JJS', 'UH', 'RBR', 'RBS', 'PDT'}
-    filtered_words = {1: '', 1.5: '', 2: '', 2.5: '', 3: '', 3.5: '', 4: '', 4.5: '', 5: ''}
+    # Turns out that reviews are only whole stars
+    # This dictionary maps star value to dictionaries that map from word to number of times
+    # that word appears in a review that has the certain star value.
+    stars_dict = {1: {}, 2: {}, 3: {}, 4: {}, 5: {}}
+    # These are the parts of speech -- adjectives, interjections, adverbs, and pre-determiners
+    valid_pos = {'JJ', 'JJR', 'JJS', 'UH', 'RB', 'RBR', 'RBS', 'PDT'}
+    # This dictionary maps star value to string of words that appear in reviews with that star value
+    filtered_words = {1: '', 2: '', 3: '', 4: '', 5: ''}
+
+    # Stores list of stars and corresponding reviews
     stars_list = []
     review_list = []
     for rev in data:
+        # Separates review text into each word and then tagger tages each word with part of speech
         tagged = tagger.tag(word_tokenize(rev['text']))
         for word in tagged:
             filt = ''
+            # Check if part of speech is one of the ones that we are looking for
             if word[1] in valid_pos:
                 filt += word[0] + ' '
                 st = rev['stars']
@@ -43,9 +54,11 @@ def tag_reviews(n):
 
 
 def predict_star(review_list, stars_list, start, total):
+    # This transforms each review to bag-of-words vector
     vectorizer = CountVectorizer(min_df=1)
     x = vectorizer.fit_transform(review_list)
 
+    # Classifier is SVM classification
     clf = svm.SVC()
     clf.fit(x, stars_list)
 
@@ -53,6 +66,7 @@ def predict_star(review_list, stars_list, start, total):
     predict = 0.
     act = 0.
     with open('yelp_academic_dataset_review.json') as f:
+        # Skip the first 'start' entries that we used for training
         for _ in xrange(start):
             next(f)
         for line in f:
