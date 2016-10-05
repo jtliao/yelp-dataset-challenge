@@ -20,6 +20,8 @@ def tag_reviews(n):
                 data.append(json.loads(line))
             else:
                 break
+    print "Read %d lines from the review json file" % n
+
     # Turns out that reviews are only whole stars
     # This dictionary maps star value to dictionaries that map from word to number of times
     # that word appears in a review that has the certain star value.
@@ -32,9 +34,16 @@ def tag_reviews(n):
     # Stores list of stars and corresponding reviews
     stars_list = []
     review_list = []
+
+    review_bigram_list = []
+
     for rev in data:
         # Separates review text into each word and then tagger tages each word with part of speech
-        tagged = tagger.tag(word_tokenize(rev['text']))
+        review = rev['text']
+
+        review_bigram_list += [review]
+        tagged = tagger.tag(word_tokenize(review))
+
         for word in tagged:
             filt = ''
             # Check if part of speech is one of the ones that we are looking for
@@ -46,14 +55,25 @@ def tag_reviews(n):
                     stars_dict[st][word[0]] += 1
                 else:
                     stars_dict[st][word[0]] = 1
-                stars_list.append(st)
-                review_list.append(filt)
-    return filtered_words, review_list, stars_list
+        stars_list.append(st)
+        review_list.append(filt)
+    print stars_list
+    print "Filtered out words in each review"
+    return filtered_words, review_list, stars_list, review_bigram_list
 # for w in sorted(stars_dict[1], key=stars_dict[1].get, reverse=True):
 #     print(w, stars_dict[1][w])
 
 
-def predict_star(review_list, stars_list, start, total):
+def predict_star(review_list, stars_list, reviews_bigram, start, total):
+    #print review_list
+    #print reviews_bigram
+
+    bigram_vectorizer = CountVectorizer(ngram_range=(2,2), min_df=1)
+    x_2 = bigram_vectorizer.fit_transform(reviews_bigram)
+    print x_2
+    clf_bigram = svm.SVC()
+    clf_bigram.fit(x_2, stars_list)
+
     # This transforms each review to bag-of-words vector
     vectorizer = CountVectorizer(min_df=1)
     x = vectorizer.fit_transform(review_list)
@@ -62,6 +82,11 @@ def predict_star(review_list, stars_list, start, total):
     clf = svm.SVC()
     clf.fit(x, stars_list)
 
+    print "Finished converting reviews to Bag-Of-Words"
+
+    predict_bigram = 0.
+    act_bigram = 0.
+
     counter = 0
     predict = 0.
     act = 0.
@@ -69,17 +94,29 @@ def predict_star(review_list, stars_list, start, total):
         # Skip the first 'start' entries that we used for training
         for _ in xrange(start):
             next(f)
+        print "Starting to predict the next %d reviews" % total
         for line in f:
             if counter < total:
                 counter += 1
                 js = json.loads(line)
-                pred = clf.predict(vectorizer.transform([js['text']]))
-                act += js['stars']
+                review = [js['text']]
+                pred = clf.predict(vectorizer.transform(review))
+                pred_bigram = clf_bigram.predict(bigram_vectorizer.transform(review))
+                print "pred is %d" % pred_bigram
+
+                stars = js['stars']
+                act += stars
+                act_bigram += stars
+
+                print "stars is %d" % stars
+
                 predict += pred
+                predict_bigram += pred_bigram
                 # print 'actual:' + str(js['stars']) + ' prediction:' + str(pred)
             else:
                 break
     print "accuracy = " + str(1 - (abs(act-predict)/act))
+    print "accuracy bigram = " + str(1 - (abs(act_bigram - predict_bigram) / act_bigram))
 
 
 def word_cloud(words, n):
@@ -91,8 +128,8 @@ def word_cloud(words, n):
 
 
 def main():
-    words, reviews, stars = tag_reviews(2000)
-    predict_star(reviews, stars, 2000, 500)
+    words, reviews, stars, reviews_bigram = tag_reviews(2000)
+    predict_star(reviews, stars, reviews_bigram, 2000, 500)
     # word_cloud(words, 5)
 
 
