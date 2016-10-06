@@ -6,7 +6,7 @@ from wordcloud import WordCloud
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn import svm
 
-
+#possible insights: for bigrams, make sure 1 word is part of filtered POS
 def tag_reviews(n):
     # Tagger tags each word with its part of speech
     tagger = PerceptronTagger()
@@ -70,7 +70,7 @@ def predict_star(review_list, stars_list, reviews_bigram, start, total):
 
     bigram_vectorizer = CountVectorizer(ngram_range=(2,2))
     x_2 = bigram_vectorizer.fit_transform(reviews_bigram)
-    print x_2
+    # print x_2
     clf_bigram = svm.SVC(kernel='linear')
     clf_bigram.fit(x_2, stars_list)
 
@@ -94,10 +94,11 @@ def predict_star(review_list, stars_list, reviews_bigram, start, total):
     print "Finished converting reviews to Bag-Of-Words"
 
     predict_bigram = 0.
-    act_bigram = 0.
     error_bigram = 0.
 
     counter = 0
+    correct_counter = 0
+    correct_counter_bigram = 0
     predict = 0.
     act = 0.
     error = 0.
@@ -114,24 +115,28 @@ def predict_star(review_list, stars_list, reviews_bigram, start, total):
                 review = [js['text']]
                 pred = clf.predict(vectorizer.transform(review))
                 pred_bigram = clf_bigram.predict(bigram_vectorizer.transform(review))
-                print "pred is %d" % pred_bigram
+                # print "pred is %d" % pred_bigram
 
                 stars = js['stars']
                 act += stars
-                act_bigram += stars
 
-                print "stars is %d" % stars
+                # print "stars is %d" % stars
 
                 predict += pred
                 predict_bigram += pred_bigram
+                if stars == pred:
+                    correct_counter += 1
+                if stars == pred_bigram:
+                    correct_counter_bigram += 1
                 # print 'actual:' + str(js['stars']) + ' prediction:' + str(pred)
 
-                error += (abs(act-predict)/act)
-                error_bigram += (abs(act_bigram-pred_bigram)/act_bigram)
+                error += (abs(stars-pred))
+                error_bigram += (abs(stars-pred_bigram))
             else:
                 break
-    print "accuracy = " + str(1 - (error/counter))
-    print "accuracy bigram = " + str(1 - (error_bigram/counter))
+    print "avg error = " + str((error/counter))
+    print "avg error bigram = " + str((error_bigram/counter))
+    print "correct pred bigram: " + str(float(correct_counter_bigram)/counter) + " correct pred uni: " + str(float(correct_counter)/counter)
 
 
 def word_cloud(words, n):
@@ -143,8 +148,8 @@ def word_cloud(words, n):
 
 
 def main():
-    words, reviews, review_bigrams, stars = tag_reviews(1000)
-    predict_star(reviews, stars, review_bigrams, 1000, 500)
+    words, reviews, review_bigrams, stars = tag_reviews(2000)
+    predict_star(reviews, stars, review_bigrams, 2000, 1000)
     #word_cloud(words, 5)
 
 
