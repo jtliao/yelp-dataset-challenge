@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn import svm
+from nltk.sentiment import SentimentIntensityAnalyzer
+
 
 #possible insights: for bigrams, make sure 1 word is part of filtered POS
 def tag_reviews(n):
@@ -37,9 +39,10 @@ def tag_reviews(n):
 
     review_bigram_list = []
 
+    analyze([data[0]['text'], data[11]['text'], data[15]['text'], data[21]['text']])
     for rev in data:
 
-        # Separates review text into each word and then tagger tages each word with part of speech
+        # Separates review text into each word and then tagger tags each word with part of speech
         review = rev['text']
 
         review_bigram_list += [review]
@@ -137,6 +140,16 @@ def predict_star(review_list, stars_list, reviews_bigram, start, total):
     print "avg error = " + str((error/counter))
     print "avg error bigram = " + str((error_bigram/counter))
     print "correct pred bigram: " + str(float(correct_counter_bigram)/counter) + " correct pred uni: " + str(float(correct_counter)/counter)
+
+
+def analyze(sentences):
+    #sentences = ["i love food", "i dont like that dish"]
+    sid = SentimentIntensityAnalyzer()
+    for s in sentences:
+        print(s)
+        ss = sid.polarity_scores(s)
+        for k in sorted(ss):
+            print('{0}:{1}, '.format(k, ss[k], end=''))
 
 
 def word_cloud(words, n):
