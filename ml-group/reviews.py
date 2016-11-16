@@ -22,7 +22,7 @@ def tag_reviews(n):
                 data.append(json.loads(line))
             else:
                 break
-    print "Read %d lines from the review json file" % n
+    print("Read %d lines from the review json file" % n)
 
     # Turns out that reviews are only whole stars
     # This dictionary maps star value to dictionaries that map from word to number of times
@@ -94,7 +94,7 @@ def predict_star(review_list, stars_list, reviews_bigram, start, total):
     clf = svm.SVC(kernel='linear')
     clf.fit(x, stars_list)
 
-    print "Finished converting reviews to Bag-Of-Words"
+    print("Finished converting reviews to Bag-Of-Words")
 
     predict_bigram = 0.
     error_bigram = 0.
@@ -107,9 +107,9 @@ def predict_star(review_list, stars_list, reviews_bigram, start, total):
     error = 0.
     with open('yelp_academic_dataset_review.json') as f:
         # Skip the first 'start' entries that we used for training
-        for _ in xrange(start):
+        for _ in range(start):
             next(f)
-        print "Starting to predict the next %d reviews" % total
+        print("Starting to predict the next %d reviews" % total)
         for line in f:
             if counter < total:
                 counter += 1
@@ -137,9 +137,10 @@ def predict_star(review_list, stars_list, reviews_bigram, start, total):
                 error_bigram += (abs(stars-pred_bigram))
             else:
                 break
-    print "avg error = " + str((error/counter))
-    print "avg error bigram = " + str((error_bigram/counter))
-    print "correct pred bigram: " + str(float(correct_counter_bigram)/counter) + " correct pred uni: " + str(float(correct_counter)/counter)
+    print("avg error = " + str((error/counter)))
+    print("avg error bigram = " + str((error_bigram/counter)))
+    print("correct pred bigram: " + str(float(correct_counter_bigram)/counter) + " correct pred uni: " +
+          str(float(correct_counter)/counter))
 
 
 def analyze(sentences):

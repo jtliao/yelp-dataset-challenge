@@ -1,9 +1,9 @@
 import json
 import pickle
-import nltk
 import matplotlib.pyplot as plt
 import time
 from scipy.stats.stats import pearsonr
+from nltk.sentiment import SentimentIntensityAnalyzer
 
 
 def json_to_dict():
@@ -16,7 +16,8 @@ def json_to_dict():
             json_line = json.loads(line)
             json_dict = {"funny": json_line["votes"]["funny"], "useful": json_line["votes"]["useful"],
                          "cool": json_line["votes"]["cool"], "stars": json_line["stars"], "text": json_line["text"],
-                         "business_id": json_line["business_id"], "user_id": json_line["user_id"]}
+                         "business_id": json_line["business_id"], "user_id": json_line["user_id"],
+                         "date": json_line["date"]}
             data.append(json_dict)
     pickle.dump(data, open("reviews.pkl", "wb"))
 
@@ -32,7 +33,7 @@ def analyze_text(reviews):
         review_count += 1
         if review_count % 10000 == 0:
             print(review_count)
-        #tokens = nltk.word_tokenize(review["text"])
+        # tokens = nltk.word_tokenize(review["text"])
         tokens = str.split(review["text"])
         total_length += len(tokens)
         stars_list.append(review["stars"])
@@ -41,14 +42,17 @@ def analyze_text(reviews):
     avg_length = total_length/review_count
     print("average review length: " + str(avg_length))
 
+    # get correlation between review length and stars
     corr = pearsonr(length_list, stars_list)
-    print("correlation constant, text length vs stars: " + str(corr[0]))
+    print("correlation constant, text length vs stars: " + str(corr))
 
+    # scatter plot for review length v. stars
     plt.scatter(length_list, stars_list)
     plt.xlabel("Text length")
     plt.ylabel("Stars")
     plt.show()
 
+    # histogram for text length
     plt.hist(length_list, bins=100)
     plt.xlabel("Text length")
     plt.ylabel("Frequency")
@@ -58,10 +62,10 @@ def analyze_text(reviews):
 
 def main():
     start = time.time()
-    # json_to_dict() # uncomment this to generate the pickled file, then comment it out on subsequent runs
+    json_to_dict() # uncomment this to generate the pickled file, then comment it out on subsequent runs
     reviews_dict = pickle.load(open("reviews.pkl", "rb"))
     end = time.time()
-    print(end-start)
+    print("time taken to load: " + str(end-start))
     print("Reviews loaded")
     analyze_text(reviews_dict)
 
