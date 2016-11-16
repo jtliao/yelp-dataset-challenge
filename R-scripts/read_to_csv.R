@@ -10,8 +10,8 @@ library(parallel)
 library(sqldf)
 library(jsonlite)
 
-business <- stream_in(file("business.json","r"))
-review <- stream_in(file("review.json", "r"))
+business <- stream_in(file("yelp_academic_dataset_business.json","r"))
+review <- stream_in(file("yelp_academic_dataset_review.json", "r"))
 # dataset <- stream_in(file("dataset.json","r"))
 # tip     <- stream_in(file("tip.json","r"))
 

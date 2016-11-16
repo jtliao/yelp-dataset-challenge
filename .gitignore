@@ -5,3 +5,6 @@
 .project
 Dataset_Challenge_Academic_Dataset_Agreement.pdf
 Yelp_Dataset_Challenge_Terms_round_8.pdf
+*.bin
+*.pkl
+.Rhistory
