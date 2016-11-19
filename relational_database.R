@@ -1,6 +1,6 @@
 library(jsonlite)
 setwd("~/Yelp")
-business <- stream_in()
+business <- stream_in(file("business.json"))
 extract <- function(data,attribute){
   if(!is.character(attribute) | is.null(data[[attribute]])) return("Error:check ur att input")
   else
