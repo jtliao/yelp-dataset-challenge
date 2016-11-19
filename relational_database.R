@@ -13,7 +13,8 @@ extract <- function(data,attribute){
 bz_hours <- extract(data = business, attribute = c("hours"))
 bz_attributes <- extract(data = business, attribute="attributes")
 
-
+stream_out(extract(data = business, attribute = "categories"), file("categories"))
+   
 # isolate categories into a separate matrix
 cat    <- unlist(business$categories)
 unicat <- unique(cat)
@@ -30,8 +31,3 @@ catmat <- apply(catmat, 2, as.numeric)
 catmat <- as.data.frame(catmat)
 catmat <- cbind(business$business_id, catmat)
 names(catmat)[1] <- "business_id"
-
-stream_out(catmat)
-
-
-
