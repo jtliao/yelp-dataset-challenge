@@ -25,8 +25,8 @@ def analyze_text(tips, reviews):
 
     tips_dict = {}
     review_stars_list = []
-    star_count_dict = {1:0, 2:0, 3:0, 4:0, 5:0}
-    star_length_dict = {1:0, 2:0, 3:0, 4:0, 5:0}
+    star_count_dict = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    star_length_dict = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
 
     for tip in tips:
         tip_count += 1
